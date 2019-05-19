@@ -1,7 +1,7 @@
-const Trez = require("./Trez"); // Or simply `require("trez-sms-client")`, if you have installed from NPM
+const TrezSMSClient = require("./Trez"); // Or simply `require("trez-sms-client")`, if you have installed from NPM
 const username = "xxxxxxxxxx";
 const password = "xxxxxxxx";
-const client = new Trez(username, password);
+const client = new TrezSMSClient(username, password);
 
 const sender   = "5000248889";
 const receiver = "5000248889";
