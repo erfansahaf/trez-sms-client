@@ -4,4 +4,4 @@ This library is created in purpose of working with Trez SMS Webservice within th
 
 ## Samples
 
-Sample codes are exists in the `samples.js` file, located in the root of this respository.
+Sample codes exist in the `samples.js` file, located in the root path of this respository.

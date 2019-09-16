@@ -7,6 +7,35 @@ const sender   = "5000248889";
 const receiver = "5000248889";
 const groupId  = client.getRandomGroupId();
 
+// ========== OTP Mobile Authentication ============
+// Send a random code automatically to a mobile number
+client.autoSendCode("09301234567", "Signiture Footer For Branding")
+    .then((messageId) => {
+        console.log("Sent Message ID: " + messageId);
+    })
+    .catch(error => console.log(error));
+
+// Validate a code which was sent to a number by autoSendCode
+client.checkCode("09301234567", "595783")
+    .then((isValid) => {
+        if (isValid) {
+            console.log("Code 595783 for this number 09301234567 is valid and verified.");
+        }
+        else {
+            console.log("Provided code for that number is not valid!");
+        }
+    })
+    .catch(error => console.log(error));
+
+// Send a code manually to a mobile number
+client.manualSendCode("09301234567", "Verification Code: 595783")
+    .then((messageId) => {
+        console.log("Sent Message ID: " + messageId);
+    })
+    .catch(error => console.log(error));
+
+// ======== END OTP Method Examples ===========
+
 // Sending a message to a number or a list of numbers
 client.sendMessage(sender, "0936xxxxxxx,0912xxxxxxx,0930xxxxxxx", "Hello World!", groupId)
         .then((receipt) => {

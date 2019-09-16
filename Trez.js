@@ -3,11 +3,84 @@ class TrezSMSClient {
     constructor(username, password)
     {
         const rp = require('request-promise');
+        const soap = require('soap');
         let buffer = new Buffer(username + ":" + password);
 
         this.rp = rp;
+        this.soap = soap;
+        this.username = username;
+        this.password = password;
         this.auth = "Basic " + buffer.toString("base64");
         this.baseUrl = "https://smspanel.trez.ir/api/smsAPI";
+        this.soapUrl = "http://smspanel.trez.ir/FastSend.asmx?wsdl";
+    }
+
+    autoSendCode(number, footer)
+    {
+        let $this = this;
+        const args = {
+            Username: this.username,
+            Password: this.password,
+            ReciptionNumber: number,
+            Footer: footer
+        };
+
+        return new Promise((resolve, reject) => {
+            $this
+            .toSoap("AutoSendCode", args)
+            .then((result) => {
+                resolve(result.AutoSendCodeResult);
+            })
+            .catch((error) => {
+                reject(error);
+            })
+        });
+    }
+
+    manualSendCode(number, textWithCode)
+    {
+        let $this = this;
+        const args = {
+            Username: this.username,
+            Password: this.password,
+            ReciptionNumber: number,
+            Code: textWithCode
+        };
+
+
+        return new Promise((resolve, reject) => {
+            $this
+            .toSoap("SendMessageWithCode", args)
+            .then((result) => {
+                resolve(result.SendMessageWithCodeResult);
+            })
+            .catch((error) => {
+                reject(error);
+            })
+        });
+    }
+
+    checkCode(number, userCode)
+    {
+        let $this = this;
+        const args = {
+            Username: this.username,
+            Password: this.password,
+            ReciptionNumber: number,
+            Code: userCode
+        };
+
+
+        return new Promise((resolve, reject) => {
+            $this
+            .toSoap("CheckSendCode", args)
+            .then((result) => {
+                resolve(result.CheckSendCodeResult == "true");
+            })
+            .catch((error) => {
+                reject(error);
+            })
+        });   
     }
 
     sendMessage(sender, numbers, message, groupId, time)
@@ -307,6 +380,27 @@ class TrezSMSClient {
         method = method || "POST";
         data = data || {};
         return this.makeRequest(this.baseUrl+"/"+endpoint, method, data);
+    }
+
+    toSoap(method, data)
+    {
+        return new Promise((resolve, reject) => {
+            this.soap.createClient(this.soapUrl, (error, client) => {
+                if (error) {
+                    reject(error);
+                }
+                else {
+                    client[method](data, (secondError, result) => {
+                        if (secondError) {
+                            reject(error);
+                        }
+                        else {
+                            resolve(result);
+                        }
+                    });
+                }
+            });
+        });
     }
 
     makeRequest(url, method, data)

@@ -15,6 +15,55 @@ const client = new TrezSmsClient("username", "password");
 ```
 سازنده ی کلاس TrezSmsClient دو پارامتر نام کاربری و رمز عبور حساب پنل اس‌ام‌اس شما را دریافت میکند.
 
+## احراز هویت
+
+با استفاده از متد های زیر میتوانید یک کد فعال سازی جهت احراز هویت یک شماره موبایل ارسال نمایید.
+این کد بعدا میتواند توسط خود سیستم اعتبارسنجی شود و صحت آن مورد بررسی قرار گیرد.
+
+### ارسال کد بصورت اتوماتیک
+
+با استفاده از متد زیر میتوانید بصورت اتوماتیک یک کد تصادفی برای کاربر با متن دلخواه در انتهای اس ام اس ارسال کنید.
+هنگام موفقیت آمیز بودن عملیات میتوانید از کد برگشتی برای بررسی وضعیت پیام ارسال شده در متد مربوطه استفاده نمایید.
+
+```js
+client.autoSendCode("09301234567", "Signiture Footer For Branding")
+    .then((messageId) => {
+        console.log("Sent Message ID: " + messageId);
+    })
+    .catch(error => console.log(error));
+```
+
+### بررسی صحت کد ارسال شده
+
+پس از ارسال کد فعالسازی از طریق متد قبلی، از این متد جهت اعتبارسنجی کد کاربر میتوانید استفاده نمایید:
+
+```js
+client.checkCode("09301234567", "595783")
+    .then((isValid) => {
+        if (isValid) {
+            console.log("Code 595783 for this number 09301234567 is valid and verified.");
+        }
+        else {
+            console.log("Provided code for that number is not valid!");
+        }
+    })
+    .catch(error => console.log(error));
+```
+
+### ارسال کد دلخواه
+
+از طریق این روش میتوانید کد مورد نظر را به همراه متن دلخواه به کاربر ارسال کنید.
+.این روش مانند متد ارسال پیام کار میکند
+
+هنگام موفقیت آمیز بودن عملیات میتوانید از کد برگشتی برای بررسی وضعیت پیام ارسال شده در متد مربوطه استفاده نمایید.
+
+```js
+client.manualSendCode("09301234567", "Verification Code: 595783 \nTrez WebService SMS")
+    .then((messageId) => {
+        console.log("Sent Message ID: " + messageId);
+    })
+    .catch(error => console.log(error));
+```
 
 ## ارسال پیام
 
