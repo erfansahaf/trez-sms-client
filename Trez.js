@@ -19,8 +19,6 @@ class TrezSMSClient {
     {
         let $this = this;
         const args = {
-            Username: this.username,
-            Password: this.password,
             ReciptionNumber: number,
             Footer: footer
         };
@@ -41,8 +39,6 @@ class TrezSMSClient {
     {
         let $this = this;
         const args = {
-            Username: this.username,
-            Password: this.password,
             ReciptionNumber: number,
             Code: textWithCode
         };
@@ -384,6 +380,12 @@ class TrezSMSClient {
 
     toSoap(method, data)
     {
+        const credentials = {
+            Username: this.username,
+            Password: this.password
+        }
+        data = {...credentials, ...data};
+
         return new Promise((resolve, reject) => {
             this.soap.createClient(this.soapUrl, (error, client) => {
                 if (error) {
