@@ -71,7 +71,7 @@ class TrezSMSClient {
             $this
             .toSoap("CheckSendCode", args)
             .then((result) => {
-                resolve(result.CheckSendCodeResult == "true");
+                resolve(result.CheckSendCodeResult == true);
             })
             .catch((error) => {
                 reject(error);

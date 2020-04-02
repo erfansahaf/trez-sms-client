@@ -1,6 +1,6 @@
 {
   "name": "trez-sms-client",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "Javascript client for Trez SMS Webservice",
   "main": "Trez.js",
   "scripts": {
