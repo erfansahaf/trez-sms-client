@@ -123,7 +123,7 @@ class TrezSMSClient {
         
         const data = {
             "PhoneNumber": sender,
-            "numbersMessage": numbersMessage,
+            "RecipientsMessage": numbersMessage,
             "UserGroupId": groupId
         };
 
@@ -351,7 +351,7 @@ class TrezSMSClient {
 
         return new Promise((resolve, reject) => {
             $this
-            .to("GetPrices", data)
+            .to("ShowWhiteList", data)
             .then((response) => {
                 if (response.Code == 0) {
                     resolve(response.Result);
