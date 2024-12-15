@@ -1,12 +1,13 @@
+const axios = require('axios');
+const soap = require('soap');
+const { Buffer } = require('buffer');
+
 class TrezSMSClient {
 
     constructor(username, password)
     {
-        const rp = require('request-promise');
-        const soap = require('soap');
-        let buffer = new Buffer(username + ":" + password);
+        let buffer = Buffer.from(username + ":" + password);
 
-        this.rp = rp;
         this.soap = soap;
         this.username = username;
         this.password = password;
@@ -42,7 +43,6 @@ class TrezSMSClient {
             ReciptionNumber: number,
             Code: textWithCode
         };
-
 
         return new Promise((resolve, reject) => {
             $this
@@ -108,7 +108,7 @@ class TrezSMSClient {
                 }
             })
             .catch((error) => {
-                reject({isHttpException: true, code: error.statusCode, message: error.message});
+                reject({isHttpException: true, code: error.status, message: error.message});
             });
         });
     }
@@ -139,7 +139,7 @@ class TrezSMSClient {
                 }
             })
             .catch((error) => {
-                reject({isHttpException: true, code: error.statusCode, message: error.message});
+                reject({isHttpException: true, code: error.status, message: error.message});
             });
         });
     }
@@ -172,7 +172,7 @@ class TrezSMSClient {
                 }
             })
             .catch((error) => {
-                reject({isHttpException: true, code: error.statusCode, message: error.message});
+                reject({isHttpException: true, code: error.status, message: error.message});
             });
         });
     }
@@ -192,12 +192,12 @@ class TrezSMSClient {
                 if (response.Code == 0) {
                     let resolveResult = [];
                     const iterateMessagesList = response.Result.MessagesListState; 
-                    for (let ptr in iterateMessagesList) {
+                    for (let msg of iterateMessagesList) {
                         resolveResult.push({
-                            recieved: (iterateMessagesList[ptr].Status == 1),
-                            status: iterateMessagesList[ptr].Status,
-                            message: $this.getMessageStatus(iterateMessagesList[ptr].Status),
-                            number: iterateMessagesList[ptr].Mobile,
+                            recieved: (msg.Status == 1),
+                            status: msg.Status,
+                            message: $this.getMessageStatus(msg.Status),
+                            number: msg.Mobile,
                         });
                     }
                     resolve(resolveResult);
@@ -207,7 +207,7 @@ class TrezSMSClient {
                 }
             })
             .catch((error) => {
-                reject({isHttpException: true, code: error.statusCode, message: error.message});
+                reject({isHttpException: true, code: error.status, message: error.message});
             });
         });
     }
@@ -232,12 +232,12 @@ class TrezSMSClient {
                 if (response.Code == 0) {
                     let resolveResult = [];
                     const iterateMessagesList = response.Result; 
-                    for (let ptr in iterateMessagesList) {
+                    for (let msg of iterateMessagesList) {
                         resolveResult.push({
-                            id: iterateMessagesList[ptr].MsgId,
-                            recieved: (iterateMessagesList[ptr].Status == 1),
-                            status: iterateMessagesList[ptr].Status,
-                            message: $this.getMessageStatus(iterateMessagesList[ptr].Status)
+                            id: msg.MsgId,
+                            recieved: (msg.Status == 1),
+                            status: msg.Status,
+                            message: $this.getMessageStatus(msg.Status)
                         });
                     }
                     resolve(resolveResult);
@@ -247,7 +247,7 @@ class TrezSMSClient {
                 }
             })
             .catch((error) => {
-                reject({isHttpException: true, code: error.statusCode, message: error.message});
+                reject({isHttpException: true, code: error.status, message: error.message});
             });
         });
     }
@@ -271,14 +271,13 @@ class TrezSMSClient {
                 if (response.Code == 0) {
                     let resolveResult = [];
                     const iterateMessagesList = response.Result.ReceivedMsgs; 
-                    for (let ptr in iterateMessagesList) {
+                    for (let msg of iterateMessagesList) {
                         resolveResult.push({
-                            from: iterateMessagesList[ptr].Mobile,
-                            date: iterateMessagesList[ptr].Date,
-                            message: iterateMessagesList[ptr].MsgBody
+                            from: msg.Mobile,
+                            date: msg.Date,
+                            message: msg.MsgBody
                         });
                     }
-                    console.log(resolveResult);
                     resolve({
                         totalPages: response.Result.TotalPage,
                         currentPage: response.Result.Page,
@@ -290,7 +289,7 @@ class TrezSMSClient {
                 }
             })
             .catch((error) => {
-                reject({isHttpException: true, code: error.statusCode, message: error.message});
+                reject({isHttpException: true, code: error.status, message: error.message});
             });
         });
     }
@@ -311,7 +310,7 @@ class TrezSMSClient {
                 }
             })
             .catch((error) => {
-                reject({isHttpException: true, code: error.statusCode, message: error.message});
+                reject({isHttpException: true, code: error.status, message: error.message});
             });
         });
     }
@@ -332,7 +331,7 @@ class TrezSMSClient {
                 }
             })
             .catch((error) => {
-                reject({isHttpException: true, code: error.statusCode, message: error.message});
+                reject({isHttpException: true, code: error.status, message: error.message});
             });
         });   
     }
@@ -361,7 +360,7 @@ class TrezSMSClient {
                 }
             })
             .catch((error) => {
-                reject({isHttpException: true, code: error.statusCode, message: error.message});
+                reject({isHttpException: true, code: error.status, message: error.message});
             });
         });   
     }
@@ -394,7 +393,7 @@ class TrezSMSClient {
                 else {
                     client[method](data, (secondError, result) => {
                         if (secondError) {
-                            reject(error);
+                            reject(secondError);
                         }
                         else {
                             resolve(result);
@@ -407,16 +406,23 @@ class TrezSMSClient {
 
     makeRequest(url, method, data)
     {
+        const headers = {
+            'Authorization': this.auth,
+            'Content-Type': 'application/json'
+        };
+
         const options = {
             url,
             method,
-            body: data,
-            headers: {
-                'Authorization': this.auth
-            },
-            json: true
+            headers,
+            data
         };
-        return this.rp(options);
+
+        return axios(options)
+        .then(response => response.data)
+        .catch(error => {
+            throw error;
+        });
     }
 
     getRandomGroupId()
@@ -473,7 +479,6 @@ class TrezSMSClient {
             5003: 'در هنگام دریافت نتیجه ارسال پیام خطایی رخ داده است',
             5004: 'برخی پیام ها در هنگام ارسال با خطا مواجه شده اند',
         };
-
         
         if (code in messages) {
             return messages[code];
